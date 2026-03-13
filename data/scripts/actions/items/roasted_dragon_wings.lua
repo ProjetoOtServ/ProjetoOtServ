@@ -13,7 +13,8 @@ function roastedDragonWings.onUse(player, item, fromPosition, target, toPosition
 		return true
 	end
 
-	player:updateFood(item:getId(), 3600)
+	player:feed(3600)
+	player:updateSupplyTracker(item)
 	player:addCondition(defenseCondition)
 	player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You feel less vulnerable.")
 	player:say("Chomp.", TALKTYPE_MONSTER_SAY)

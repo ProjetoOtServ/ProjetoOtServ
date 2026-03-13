@@ -39,7 +39,7 @@ local demonicCandyBall = Action()
 
 function demonicCandyBall.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 	if player:hasExhaustion("special-foods-cooldown") then
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You need to wait before using it again.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você precisa aguardar antes de utilizar novamente.")
 		return true
 	end
 
@@ -47,21 +47,24 @@ function demonicCandyBall.onUse(player, item, fromPosition, target, toPosition, 
 	local randomConditionIndex = math.random(1, 4)
 
 	if randomConditionIndex == 1 then
-		player:updateFood(item:getId(), 3600)
+		player:feed(3600)
+		player:updateSupplyTracker(item)
 		player:addCondition(availableConditions[math.random(1, #availableConditions)])
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You feel stronger, but you have no idea what was increased.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você se sente mais forte, mas não faz ideia do que foi fortalecido.")
 	elseif randomConditionIndex == 2 then
-		player:updateFood(item:getId(), 3600)
+		player:feed(3600)
+		player:updateSupplyTracker(item)
 		player:addCondition(lightCondition)
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You feel enlightened.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você se sente iluminado.")
 	elseif randomConditionIndex == 3 then
-		player:updateFood(item:getId(), 3600)
+		player:feed(3600)
+		player:updateSupplyTracker(item)
 		player:addCondition(condition_i)
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You became invisible.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você se tornou invisível.")
 	elseif randomConditionIndex == 4 then
 		player:addHealth(player:getMaxHealth())
 		player:addMana(player:getMaxMana())
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Your vitality has been restored.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Sua vitalidade foi restaurada.")
 	end
 
 	player:say("Smack.", TALKTYPE_MONSTER_SAY)

@@ -9,13 +9,14 @@ local northernFishburger = Action()
 
 function northernFishburger.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 	if player:hasExhaustion("special-foods-cooldown") then
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You need to wait before using it again.")
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você precisa aguardar antes de tentar novamente.")
 		return true
 	end
 
-	player:updateFood(item:getId(), 3600)
+	player:feed(3600)
+	player:updateSupplyTracker(item)
 	player:addCondition(fishingCondition)
-	player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You felt fishing inspiration.")
+	player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Você se sentiu inspirado em sua pesca.")
 	player:say("Smack.", TALKTYPE_MONSTER_SAY)
 	player:getPosition():sendMagicEffect(CONST_ME_MAGIC_RED)
 	player:setExhaustion("special-foods-cooldown", 10 * 60)

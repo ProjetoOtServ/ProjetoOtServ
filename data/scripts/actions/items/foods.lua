@@ -78,7 +78,7 @@ local foods = {
 	[8013] = { 1, "Urgh." }, -- lemon
 	[8014] = { 7, "Munch." }, -- cucumber
 	[8015] = { 5, "Crunch." }, -- onion
-	[8016] = { 1, "Gulp." }, -- jalapeÃ±o pepper
+	[8016] = { 1, "Gulp." }, -- jalapeño pepper
 	[8017] = { 5, "Munch." }, -- beetroot
 	[8019] = { 11, "Yum." }, -- chocolate cake
 	[8177] = { 7, "Slurp." }, -- yummy gummy worm
@@ -144,7 +144,7 @@ function food.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 
 	local condition = player:getCondition(CONDITION_REGENERATION, CONDITIONID_DEFAULT)
 	if condition and math.floor(condition:getTicks() / 1000 + (itemFood[1] * 12)) >= 1200 then
-		player:sendTextMessage(MESSAGE_FAILURE, "You are full.")
+		player:sendTextMessage(MESSAGE_FAILURE, "Você está cheio, não seja guloso.")
 		return true
 	end
 

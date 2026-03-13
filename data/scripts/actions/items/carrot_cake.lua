@@ -13,7 +13,8 @@ function carrotCake.onUse(player, item, fromPosition, target, toPosition, isHotk
 		return true
 	end
 
-	player:updateFood(item:getId(), 3600)
+	player:feed(3600)
+	player:updateSupplyTracker(item)
 	player:addCondition(distanceCondition)
 	player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You feel more focused.")
 	player:say("Mmmm.", TALKTYPE_MONSTER_SAY)

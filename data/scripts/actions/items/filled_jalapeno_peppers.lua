@@ -10,7 +10,8 @@ function filledJalapenoPeppers.onUse(player, item, fromPosition, target, toPosit
 		return true
 	end
 
-	player:updateFood(item:getId(), 3600)
+	player:feed(3600)
+	player:updateSupplyTracker(item)
 	player:addCondition(speedCondition)
 	player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Your speed has been increased.")
 	player:say("Munch.", TALKTYPE_MONSTER_SAY)
