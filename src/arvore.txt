@@ -1,0 +1,652 @@
+Como gerar a Árvore de Arquivos em 4 passos:
+Abra a pasta onde está o código-fonte (Source) do seu Canary pelo Windows Explorer. Entre na pasta src (é lá que moram os arquivos .cpp e .h).
+
+Clique na barra de endereços lá no topo da janela (onde fica escrito o caminho, ex: C:\ProjetoOtServ\source\src).
+
+Apague o que está escrito lá, digite apenas cmd e aperte Enter. Isso vai abrir uma tela preta (Prompt de Comando) já no diretório exato.
+
+Dentro dessa tela preta, digite o seguinte comando mágico e aperte Enter:
+tree /a /f > arvore.txt
+
+
+Listagem de caminhos de pasta
+O número de série do volume é CE5C-D894
+C:.
+|   arvore.txt
+|   canary_server.cpp
+|   canary_server.hpp
+|   CMakeLists.txt
+|   core.hpp
+|   declarations.hpp
+|   main.cpp
+|   pch.cpp
+|   pch.hpp
+|   
++---account
+|       account.cpp
+|       account.hpp
+|       account_info.hpp
+|       account_repository.cpp
+|       account_repository.hpp
+|       account_repository_db.cpp
+|       account_repository_db.hpp
+|       CMakeLists.txt
+|       
++---config
+|       CMakeLists.txt
+|       configmanager.cpp
+|       configmanager.hpp
+|       config_enums.hpp
+|       
++---creatures
+|   |   CMakeLists.txt
+|   |   creature.cpp
+|   |   creature.hpp
+|   |   creatures_definitions.hpp
+|   |   
+|   +---appearance
+|   |   +---attached_effects
+|   |   |       attached_effects.cpp
+|   |   |       attached_effects.hpp
+|   |   |       
+|   |   +---mounts
+|   |   |       mounts.cpp
+|   |   |       mounts.hpp
+|   |   |       
+|   |   \---outfit
+|   |           outfit.cpp
+|   |           outfit.hpp
+|   |           
+|   +---combat
+|   |       combat.cpp
+|   |       combat.hpp
+|   |       condition.cpp
+|   |       condition.hpp
+|   |       spells.cpp
+|   |       spells.hpp
+|   |       
+|   +---interactions
+|   |       chat.cpp
+|   |       chat.hpp
+|   |       
+|   +---monsters
+|   |   |   monster.cpp
+|   |   |   monster.hpp
+|   |   |   monsters.cpp
+|   |   |   monsters.hpp
+|   |   |   
+|   |   \---spawns
+|   |           spawn_monster.cpp
+|   |           spawn_monster.hpp
+|   |           
+|   +---npcs
+|   |   |   npc.cpp
+|   |   |   npc.hpp
+|   |   |   npcs.cpp
+|   |   |   npcs.hpp
+|   |   |   
+|   |   \---spawns
+|   |           spawn_npc.cpp
+|   |           spawn_npc.hpp
+|   |           
+|   \---players
+|       |   highscore_category.hpp
+|       |   player.cpp
+|       |   player.hpp
+|       |   stash_definitions.hpp
+|       |   
+|       +---animus_mastery
+|       |       animus_mastery.cpp
+|       |       animus_mastery.hpp
+|       |       
+|       +---components
+|       |   |   player_achievement.cpp
+|       |   |   player_achievement.hpp
+|       |   |   player_attached_effects.cpp
+|       |   |   player_attached_effects.hpp
+|       |   |   player_badge.cpp
+|       |   |   player_badge.hpp
+|       |   |   player_cyclopedia.cpp
+|       |   |   player_cyclopedia.hpp
+|       |   |   player_forge_history.cpp
+|       |   |   player_forge_history.hpp
+|       |   |   player_storage.cpp
+|       |   |   player_storage.hpp
+|       |   |   player_title.cpp
+|       |   |   player_title.hpp
+|       |   |   player_vip.cpp
+|       |   |   player_vip.hpp
+|       |   |   README.md
+|       |   |   
+|       |   \---wheel
+|       |           player_wheel.cpp
+|       |           player_wheel.hpp
+|       |           wheel_definitions.hpp
+|       |           wheel_gems.cpp
+|       |           wheel_gems.hpp
+|       |           wheel_spells.hpp
+|       |           
+|       +---grouping
+|       |       familiars.cpp
+|       |       familiars.hpp
+|       |       groups.cpp
+|       |       groups.hpp
+|       |       guild.cpp
+|       |       guild.hpp
+|       |       party.cpp
+|       |       party.hpp
+|       |       team_finder.hpp
+|       |       
+|       +---imbuements
+|       |       imbuements.cpp
+|       |       imbuements.hpp
+|       |       
+|       +---management
+|       |       ban.cpp
+|       |       ban.hpp
+|       |       waitlist.cpp
+|       |       waitlist.hpp
+|       |       
+|       +---storages
+|       |       storages.cpp
+|       |       storages.hpp
+|       |       
+|       \---vocations
+|               vocation.cpp
+|               vocation.hpp
+|               
++---database
+|       CMakeLists.txt
+|       database.cpp
+|       database.hpp
+|       databasemanager.cpp
+|       databasemanager.hpp
+|       databasetasks.cpp
+|       databasetasks.hpp
+|       database_definitions.hpp
+|       
++---enums
+|       account_coins.hpp
+|       account_errors.hpp
+|       account_group_type.hpp
+|       account_type.hpp
+|       container_type.hpp
+|       forge_conversion.hpp
+|       item_attribute.hpp
+|       lua_variant_type.hpp
+|       object_category.hpp
+|       player_blessings.hpp
+|       player_cyclopedia.hpp
+|       player_icons.hpp
+|       player_wheel.hpp
+|       
++---game
+|   |   CMakeLists.txt
+|   |   game.cpp
+|   |   game.hpp
+|   |   game_definitions.hpp
+|   |   
+|   +---bank
+|   |       bank.cpp
+|   |       bank.hpp
+|   |       
+|   +---functions
+|   |       game_reload.cpp
+|   |       game_reload.hpp
+|   |       
+|   +---modal_window
+|   |       modal_window.hpp
+|   |       
+|   +---movement
+|   |       position.cpp
+|   |       position.hpp
+|   |       teleport.cpp
+|   |       teleport.hpp
+|   |       
+|   +---scheduling
+|   |       dispatcher.cpp
+|   |       dispatcher.hpp
+|   |       events_scheduler.cpp
+|   |       events_scheduler.hpp
+|   |       save_manager.cpp
+|   |       save_manager.hpp
+|   |       task.cpp
+|   |       task.hpp
+|   |       
+|   \---zones
+|           zone.cpp
+|           zone.hpp
+|           
++---io
+|   |   CMakeLists.txt
+|   |   fileloader.cpp
+|   |   fileloader.hpp
+|   |   filestream.cpp
+|   |   filestream.hpp
+|   |   iobestiary.cpp
+|   |   iobestiary.hpp
+|   |   ioguild.cpp
+|   |   ioguild.hpp
+|   |   iologindata.cpp
+|   |   iologindata.hpp
+|   |   iomap.cpp
+|   |   iomap.hpp
+|   |   iomapserialize.cpp
+|   |   iomapserialize.hpp
+|   |   iomarket.cpp
+|   |   iomarket.hpp
+|   |   ioprey.cpp
+|   |   ioprey.hpp
+|   |   io_bosstiary.cpp
+|   |   io_bosstiary.hpp
+|   |   io_definitions.hpp
+|   |   io_wheel.cpp
+|   |   io_wheel.hpp
+|   |   player_storage_repository.hpp
+|   |   player_storage_repository_db.cpp
+|   |   player_storage_repository_db.hpp
+|   |   
+|   \---functions
+|           iologindata_load_player.cpp
+|           iologindata_load_player.hpp
+|           iologindata_save_player.cpp
+|           iologindata_save_player.hpp
+|           
++---items
+|   |   bed.cpp
+|   |   bed.hpp
+|   |   CMakeLists.txt
+|   |   cylinder.cpp
+|   |   cylinder.hpp
+|   |   item.cpp
+|   |   item.hpp
+|   |   items.cpp
+|   |   items.hpp
+|   |   items_classification.hpp
+|   |   items_definitions.hpp
+|   |   thing.cpp
+|   |   thing.hpp
+|   |   tile.cpp
+|   |   tile.hpp
+|   |   trashholder.cpp
+|   |   trashholder.hpp
+|   |   
+|   +---containers
+|   |   |   container.cpp
+|   |   |   container.hpp
+|   |   |   
+|   |   +---depot
+|   |   |       depotchest.cpp
+|   |   |       depotchest.hpp
+|   |   |       depotlocker.cpp
+|   |   |       depotlocker.hpp
+|   |   |       
+|   |   +---inbox
+|   |   |       inbox.cpp
+|   |   |       inbox.hpp
+|   |   |       
+|   |   +---mailbox
+|   |   |       mailbox.cpp
+|   |   |       mailbox.hpp
+|   |   |       
+|   |   \---rewards
+|   |           reward.cpp
+|   |           reward.hpp
+|   |           rewardchest.cpp
+|   |           rewardchest.hpp
+|   |           
+|   +---decay
+|   |       decay.cpp
+|   |       decay.hpp
+|   |       
+|   +---functions
+|   |   \---item
+|   |           attribute.cpp
+|   |           attribute.hpp
+|   |           custom_attribute.cpp
+|   |           custom_attribute.hpp
+|   |           item_parse.cpp
+|   |           item_parse.hpp
+|   |           
+|   \---weapons
+|           weapons.cpp
+|           weapons.hpp
+|           
++---kv
+|       CMakeLists.txt
+|       kv.cpp
+|       kv.hpp
+|       kv_definitions.hpp
+|       kv_sql.cpp
+|       kv_sql.hpp
+|       README.md
+|       value_wrapper.cpp
+|       value_wrapper.hpp
+|       value_wrapper_proto.cpp
+|       value_wrapper_proto.hpp
+|       
++---lib
+|   |   CMakeLists.txt
+|   |   
+|   +---di
+|   |       container.hpp
+|   |       injector.hpp
+|   |       README.md
+|   |       runtime_provider.hpp
+|   |       shared.hpp
+|   |       soft_singleton.cpp
+|   |       soft_singleton.hpp
+|   |       
+|   +---logging
+|   |       logger.cpp
+|   |       logger.hpp
+|   |       log_with_spd_log.cpp
+|   |       log_with_spd_log.hpp
+|   |       
+|   +---messaging
+|   |       command.hpp
+|   |       event.hpp
+|   |       message.hpp
+|   |       
+|   +---metrics
+|   |       metrics.cpp
+|   |       metrics.hpp
+|   |       
+|   \---thread
+|           README.md
+|           thread_pool.cpp
+|           thread_pool.hpp
+|           
++---lua
+|   |   CMakeLists.txt
+|   |   lua_definitions.hpp
+|   |   
+|   +---callbacks
+|   |       callbacks_definitions.hpp
+|   |       CMakeLists.txt
+|   |       creaturecallback.cpp
+|   |       creaturecallback.hpp
+|   |       events_callbacks.cpp
+|   |       events_callbacks.hpp
+|   |       event_callback.cpp
+|   |       event_callback.hpp
+|   |       event_callback_manager.cpp
+|   |       event_callback_manager.hpp
+|   |       
+|   +---creature
+|   |       actions.cpp
+|   |       actions.hpp
+|   |       CMakeLists.txt
+|   |       creatureevent.cpp
+|   |       creatureevent.hpp
+|   |       events.cpp
+|   |       events.hpp
+|   |       movement.cpp
+|   |       movement.hpp
+|   |       raids.cpp
+|   |       raids.hpp
+|   |       talkaction.cpp
+|   |       talkaction.hpp
+|   |       
+|   +---functions
+|   |   |   CMakeLists.txt
+|   |   |   lua_functions_loader.cpp
+|   |   |   lua_functions_loader.hpp
+|   |   |   
+|   |   +---core
+|   |   |   |   CMakeLists.txt
+|   |   |   |   core_functions.hpp
+|   |   |   |   
+|   |   |   +---game
+|   |   |   |       bank_functions.cpp
+|   |   |   |       bank_functions.hpp
+|   |   |   |       config_functions.cpp
+|   |   |   |       config_functions.hpp
+|   |   |   |       core_game_functions.hpp
+|   |   |   |       game_functions.cpp
+|   |   |   |       game_functions.hpp
+|   |   |   |       global_functions.cpp
+|   |   |   |       global_functions.hpp
+|   |   |   |       lua_enums.cpp
+|   |   |   |       lua_enums.hpp
+|   |   |   |       modal_window_functions.cpp
+|   |   |   |       modal_window_functions.hpp
+|   |   |   |       zone_functions.cpp
+|   |   |   |       zone_functions.hpp
+|   |   |   |       
+|   |   |   +---libs
+|   |   |   |       core_libs_functions.hpp
+|   |   |   |       db_functions.cpp
+|   |   |   |       db_functions.hpp
+|   |   |   |       kv_functions.cpp
+|   |   |   |       kv_functions.hpp
+|   |   |   |       logger_functions.cpp
+|   |   |   |       logger_functions.hpp
+|   |   |   |       metrics_functions.cpp
+|   |   |   |       metrics_functions.hpp
+|   |   |   |       result_functions.cpp
+|   |   |   |       result_functions.hpp
+|   |   |   |       
+|   |   |   \---network
+|   |   |           core_network_functions.hpp
+|   |   |           network_message_functions.cpp
+|   |   |           network_message_functions.hpp
+|   |   |           webhook_functions.cpp
+|   |   |           webhook_functions.hpp
+|   |   |           
+|   |   +---creatures
+|   |   |   |   CMakeLists.txt
+|   |   |   |   creature_functions.cpp
+|   |   |   |   creature_functions.hpp
+|   |   |   |   
+|   |   |   +---combat
+|   |   |   |       combat_functions.cpp
+|   |   |   |       combat_functions.hpp
+|   |   |   |       condition_functions.cpp
+|   |   |   |       condition_functions.hpp
+|   |   |   |       spell_functions.cpp
+|   |   |   |       spell_functions.hpp
+|   |   |   |       variant_functions.cpp
+|   |   |   |       variant_functions.hpp
+|   |   |   |       
+|   |   |   +---monster
+|   |   |   |       charm_functions.cpp
+|   |   |   |       charm_functions.hpp
+|   |   |   |       loot_functions.cpp
+|   |   |   |       loot_functions.hpp
+|   |   |   |       monster_functions.cpp
+|   |   |   |       monster_functions.hpp
+|   |   |   |       monster_spell_functions.cpp
+|   |   |   |       monster_spell_functions.hpp
+|   |   |   |       monster_type_functions.cpp
+|   |   |   |       monster_type_functions.hpp
+|   |   |   |       
+|   |   |   +---npc
+|   |   |   |       npc_functions.cpp
+|   |   |   |       npc_functions.hpp
+|   |   |   |       npc_type_functions.cpp
+|   |   |   |       npc_type_functions.hpp
+|   |   |   |       shop_functions.cpp
+|   |   |   |       shop_functions.hpp
+|   |   |   |       
+|   |   |   \---player
+|   |   |           group_functions.cpp
+|   |   |           group_functions.hpp
+|   |   |           guild_functions.cpp
+|   |   |           guild_functions.hpp
+|   |   |           mount_functions.cpp
+|   |   |           mount_functions.hpp
+|   |   |           party_functions.cpp
+|   |   |           party_functions.hpp
+|   |   |           player_functions.cpp
+|   |   |           player_functions.hpp
+|   |   |           vocation_functions.cpp
+|   |   |           vocation_functions.hpp
+|   |   |           
+|   |   +---events
+|   |   |       action_functions.cpp
+|   |   |       action_functions.hpp
+|   |   |       CMakeLists.txt
+|   |   |       creature_event_functions.cpp
+|   |   |       creature_event_functions.hpp
+|   |   |       events_functions.hpp
+|   |   |       events_scheduler_functions.cpp
+|   |   |       events_scheduler_functions.hpp
+|   |   |       event_callback_functions.cpp
+|   |   |       event_callback_functions.hpp
+|   |   |       global_event_functions.cpp
+|   |   |       global_event_functions.hpp
+|   |   |       move_event_functions.cpp
+|   |   |       move_event_functions.hpp
+|   |   |       talk_action_functions.cpp
+|   |   |       talk_action_functions.hpp
+|   |   |       
+|   |   +---items
+|   |   |       CMakeLists.txt
+|   |   |       container_functions.cpp
+|   |   |       container_functions.hpp
+|   |   |       imbuement_functions.cpp
+|   |   |       imbuement_functions.hpp
+|   |   |       item_classification_functions.cpp
+|   |   |       item_classification_functions.hpp
+|   |   |       item_functions.cpp
+|   |   |       item_functions.hpp
+|   |   |       item_type_functions.cpp
+|   |   |       item_type_functions.hpp
+|   |   |       weapon_functions.cpp
+|   |   |       weapon_functions.hpp
+|   |   |       
+|   |   \---map
+|   |           CMakeLists.txt
+|   |           house_functions.cpp
+|   |           house_functions.hpp
+|   |           map_functions.hpp
+|   |           position_functions.cpp
+|   |           position_functions.hpp
+|   |           teleport_functions.cpp
+|   |           teleport_functions.hpp
+|   |           tile_functions.cpp
+|   |           tile_functions.hpp
+|   |           town_functions.cpp
+|   |           town_functions.hpp
+|   |           
+|   +---global
+|   |       baseevents.cpp
+|   |       baseevents.hpp
+|   |       CMakeLists.txt
+|   |       globalevent.cpp
+|   |       globalevent.hpp
+|   |       lua_timer_event_descr.hpp
+|   |       lua_variant.hpp
+|   |       shared_object.hpp
+|   |       
+|   +---modules
+|   |       CMakeLists.txt
+|   |       modules.cpp
+|   |       modules.hpp
+|   |       
+|   \---scripts
+|           CMakeLists.txt
+|           luajit_sync.hpp
+|           luascript.cpp
+|           luascript.hpp
+|           lua_environment.cpp
+|           lua_environment.hpp
+|           scripts.cpp
+|           scripts.hpp
+|           script_environment.cpp
+|           script_environment.hpp
+|           
++---map
+|   |   CMakeLists.txt
+|   |   map.cpp
+|   |   map.hpp
+|   |   mapcache.cpp
+|   |   mapcache.hpp
+|   |   map_const.hpp
+|   |   map_definitions.hpp
+|   |   spectators.cpp
+|   |   spectators.hpp
+|   |   town.hpp
+|   |   
+|   +---house
+|   |       house.cpp
+|   |       house.hpp
+|   |       housetile.cpp
+|   |       housetile.hpp
+|   |       
+|   \---utils
+|           astarnodes.cpp
+|           astarnodes.hpp
+|           mapsector.cpp
+|           mapsector.hpp
+|           
++---protobuf
+|       appearances.proto
+|       CMakeLists.txt
+|       kv.proto
+|       
++---security
+|       argon.cpp
+|       argon.hpp
+|       CMakeLists.txt
+|       rsa.cpp
+|       rsa.hpp
+|       
++---server
+|   |   CMakeLists.txt
+|   |   server.cpp
+|   |   server.hpp
+|   |   server_definitions.hpp
+|   |   signals.cpp
+|   |   signals.hpp
+|   |   
+|   \---network
+|       +---connection
+|       |       connection.cpp
+|       |       connection.hpp
+|       |       
+|       +---message
+|       |       networkmessage.cpp
+|       |       networkmessage.hpp
+|       |       outputmessage.cpp
+|       |       outputmessage.hpp
+|       |       
+|       +---protocol
+|       |       protocol.cpp
+|       |       protocol.hpp
+|       |       protocolgame.cpp
+|       |       protocolgame.hpp
+|       |       protocollogin.cpp
+|       |       protocollogin.hpp
+|       |       protocolstatus.cpp
+|       |       protocolstatus.hpp
+|       |       
+|       \---webhook
+|               webhook.cpp
+|               webhook.hpp
+|               
+\---utils
+        arraylist.hpp
+        benchmark.cpp
+        benchmark.hpp
+        CMakeLists.txt
+        const.hpp
+        counter_pointer.cpp
+        counter_pointer.hpp
+        definitions.hpp
+        hash.hpp
+        lockfree.hpp
+        object_pool.hpp
+        pugicast.cpp
+        pugicast.hpp
+        simd.hpp
+        tools.cpp
+        tools.hpp
+        transparent_string_hash.hpp
+        utils_definitions.hpp
+        vectorset.hpp
+        vectorsort.hpp
+        wildcardtree.cpp
+        wildcardtree.hpp
+        

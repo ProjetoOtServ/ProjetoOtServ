@@ -9,10 +9,10 @@
 
 #pragma once
 
-static constexpr int32_t MAP_MAX_CLIENT_VIEW_PORT_X = 8;
-static constexpr int32_t MAP_MAX_CLIENT_VIEW_PORT_Y = 6;
-static constexpr int32_t MAP_MAX_VIEW_PORT_X = MAP_MAX_CLIENT_VIEW_PORT_X + 3; // min value: maxClientViewportX + 1
-static constexpr int32_t MAP_MAX_VIEW_PORT_Y = MAP_MAX_CLIENT_VIEW_PORT_Y + 5; // min value: maxClientViewportY + 1
+static constexpr int32_t MAP_MAX_CLIENT_VIEW_PORT_X = 15; // Expandido (Padrão era 8)
+static constexpr int32_t MAP_MAX_CLIENT_VIEW_PORT_Y = 11; // Expandido (Padrão era 6)
+static constexpr int32_t MAP_MAX_VIEW_PORT_X = MAP_MAX_CLIENT_VIEW_PORT_X + 3;
+static constexpr int32_t MAP_MAX_VIEW_PORT_Y = MAP_MAX_CLIENT_VIEW_PORT_Y + 5;
 
 static constexpr int8_t MAP_MAX_LAYERS = 16;
 static constexpr int8_t MAP_INIT_SURFACE_LAYER = 7; // (MAP_MAX_LAYERS / 2) -1
