@@ -264,7 +264,7 @@ local function processHirelingPurchase(player, offer, productType, hirelingName,
 		return error({ code = 1, message = "You cannot buy hirelings on client 10, please relog on client 12 and try again." })
 	end
 
-	if productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_HIRELING then
+	if productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_HIRELING or productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_NAMECHANGE then
 		local result = GameStore.canUseHirelingName(hirelingName)
 		if not result.ability then
 			return error({ code = 1, message = result.reason })

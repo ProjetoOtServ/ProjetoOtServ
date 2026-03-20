@@ -453,7 +453,7 @@ bool ImbuementDecay::canDecayImbuement(const std::shared_ptr<Item> &item, const 
 
 void ImbuementDecay::startImbuementDecay(const std::shared_ptr<Item> &item) {
 	if (!item) {
-		g_logger().error("[{}] item is nullptr", __FUNCTION__);
+		g_logger().debug("[{}] item is nullptr", __FUNCTION__);
 		return;
 	}
 
@@ -486,7 +486,7 @@ void ImbuementDecay::startImbuementDecay(const std::shared_ptr<Item> &item) {
 
 void ImbuementDecay::stopImbuementDecay(const std::shared_ptr<Item> &item) {
 	if (!item) {
-		g_logger().error("[{}] item is nullptr", __FUNCTION__);
+		g_logger().debug("[{}] item is nullptr", __FUNCTION__);
 		return;
 	}
 
@@ -515,7 +515,7 @@ void ImbuementDecay::checkImbuementDecay() {
 	for (auto it = m_itemsToDecay.begin(); it != m_itemsToDecay.end();) {
 		auto item = it->second.item.lock();
 		if (!item) {
-			g_logger().error("[{}] item is nullptr", __FUNCTION__);
+			g_logger().debug("[{}] item is nullptr", __FUNCTION__);
 			it = m_itemsToDecay.erase(it);
 			continue;
 		}

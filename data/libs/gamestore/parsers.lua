@@ -220,16 +220,18 @@ local function parseBuyStoreOffer(playerId, msg)
 	end
 
 	-- Cooldown Purchase
-	local playerKV = player:kv()
-	local purchaseCooldown = playerKV:get(GameStore.Kv.purchaseCooldown) or 0
-	local currentTime = os.time()
-	local waittime = purchaseCooldown - currentTime
-	if waittime > 0 then
-		queueSendStoreAlertToUser("You are making many purchases simultaneously in a few moments.", 250, playerId)
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You are making many purchases simultaneously in a few moments.")
-		return false
+	if productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_OTHER then
+		local playerKV = player:kv()
+		local purchaseCooldown = playerKV:get(GameStore.Kv.purchaseCooldown) or 0
+		local currentTime = os.time()
+		local waittime = purchaseCooldown - currentTime
+		if waittime > 0 then
+			queueSendStoreAlertToUser("You are making many purchases simultaneously in a few moments.", 250, playerId)
+			player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You are making many purchases simultaneously in a few moments.")
+			return false
+		end
+		playerKV:set(GameStore.Kv.purchaseCooldown, os.time() + 5)
 	end
-	playerKV:set(GameStore.Kv.purchaseCooldown, os.time() + 5)
 
 	-- All guarding conditions under which the offer should not be processed must be included here
 	if
@@ -313,7 +315,10 @@ local function parseBuyStoreOffer(playerId, msg)
 			GameStore.processChargesPurchase(player, offer.itemtype, offer.name, offer.charges, offer.movable, offer.setOwner)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_HIRELING then
 			local hirelingName = msg:getString()
-			local sex = msg:getByte()
+			local sex = 1
+			if productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_HIRELING then
+				sex = msg:getByte()
+			end
 			GameStore.processHirelingPurchase(player, offer, productType, hirelingName, sex)
 		elseif offer.type == GameStore.OfferTypes.OFFER_TYPE_HIRELING_NAMECHANGE then
 			local hirelingName = msg:getString()

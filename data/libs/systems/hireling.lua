@@ -517,6 +517,7 @@ function PersistHireling(hireling)
 
 	if resultId then
 		local id = Result.getNumber(resultId, "id")
+		Result.free(resultId)
 		hireling.id = id
 		return true
 	else
@@ -583,6 +584,9 @@ function Player:addNewHireling(name, sex)
 	lamp:setAttribute(ITEM_ATTRIBUTE_DESCRIPTION, "This mysterious lamp summons your very own personal hireling.\nThis item cannot be traded.\nThis magic lamp is the home of " .. hireling:getName() .. ".")
 	lamp:setCustomAttribute("Hireling", hireling:getId())
 	hireling.active = 0
+
+	self:sendUpdateContainer(inbox) -- update visual inbox
+
 	return hireling
 end
 
