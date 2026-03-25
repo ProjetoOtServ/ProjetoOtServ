@@ -73,7 +73,11 @@ foreach(
     configure_linking(${core_target})
 
     # === UNITY BUILD ===
-    if(SPEED_UP_BUILD_UNITY)
+    # Unity build may produce generated unity source files that include many .cpp
+    # files; on MSVC this can interact poorly with precompiled headers and
+    # produce C1853 when toolsets change. Disable UNITY_BUILD for MSVC to
+    # avoid PCH version mismatch while keeping it enabled for other compilers.
+    if(SPEED_UP_BUILD_UNITY AND NOT MSVC)
         set_target_properties(
             ${core_target}
             PROPERTIES UNITY_BUILD ON

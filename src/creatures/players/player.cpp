@@ -2502,8 +2502,10 @@ void Player::onApplyImbuement(const Imbuement* imbuement, const std::shared_ptr<
 
 	uint32_t price = baseImbuement->price;
 	price += protectionCharm ? baseImbuement->protectionPrice : 0;
+	g_logger().debug("[OnApplyImbuement] Player: {}, Item: {}, Category: {}, Base: {}, Price: {}, Protection: {}", getName(), item->getName(), imbuement->getCategory(), baseImbuement->id, price, protectionCharm);
 
 	if (!g_game().removeMoney(thisPlayer, price, 0, true)) {
+		g_logger().debug("[OnApplyImbuement] Failed: Not enough money. Required: {}", price);
 		const std::string message = fmt::format("You don't have {} gold coins.", price);
 
 		g_logger().error("[Player::onApplyImbuement] - An error occurred while player with name {} try to apply imbuement, player do not have money", this->getName());
@@ -2518,6 +2520,7 @@ void Player::onApplyImbuement(const Imbuement* imbuement, const std::shared_ptr<
 
 		const uint32_t inventoryItemCount = getItemTypeCount(key);
 		if (inventoryItemCount >= value) {
+			g_logger().debug("[OnApplyImbuement] Removing {}x item {} from inventory", value, key);
 			removeItemOfType(key, value, -1, true);
 			continue;
 		}
@@ -2531,10 +2534,12 @@ void Player::onApplyImbuement(const Imbuement* imbuement, const std::shared_ptr<
 
 		withdrawItemMessage << "Using " << mathItemCount << "x " << itemType.name << " from your stash. ";
 		withdrawItem(itemType.id, mathItemCount);
+		g_logger().debug("[OnApplyImbuement] Removing {}x item {} from stash", mathItemCount, itemType.id);
 		sendTextMessage(MESSAGE_STATUS, withdrawItemMessage.str());
 	}
 
 	if (!protectionCharm && uniform_random(1, 100) > baseImbuement->percent) {
+		g_logger().debug("[OnApplyImbuement] Failed: Success chance check failed ({}%)", baseImbuement->percent);
 		openImbuementWindow(item);
 		sendImbuementResult("Oh no!\n\nThe imbuement has failed. You have lost the astral sources and gold you needed for the imbuement.\n\nNext time use a protection charm to better your chances.");
 		openImbuementWindow(item);
@@ -2551,6 +2556,7 @@ void Player::onApplyImbuement(const Imbuement* imbuement, const std::shared_ptr<
 
 			addItemImbuementStats(imbuement);
 		}
+		g_logger().debug("[OnApplyImbuement] Success! Applying imbuement {} to slot {}", imbuement->getID(), slot);
 		item->setImbuement(slot, imbuement->getID(), baseImbuement->duration);
 		g_imbuementDecay().startImbuementDecay(item);
 	}

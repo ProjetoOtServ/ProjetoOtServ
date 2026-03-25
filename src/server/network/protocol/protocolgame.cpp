@@ -1853,6 +1853,7 @@ void ProtocolGame::parseApplyImbuement(NetworkMessage &msg) {
 	uint8_t slot = msg.getByte();
 	auto imbuementId = msg.get<uint32_t>();
 	bool protectionCharm = msg.getByte(true) != 0x00;
+	g_logger().debug("[ParseApplyImbuement] Player: {}, ImbuementId: {}, Slot: {}, Protection: {}", player->getName(), imbuementId, slot, protectionCharm);
 	g_game().playerApplyImbuement(player->getID(), imbuementId, slot, protectionCharm);
 }
 
@@ -8466,19 +8467,46 @@ void ProtocolGame::addImbuementInfo(NetworkMessage &msg, uint16_t imbuementId) c
 
 	msg.addByte(imbuement->isPremium() ? 0x01 : 0x00);
 
-	const auto items = imbuement->getItems();
-	msg.addByte(items.size());
-
-	for (const auto &itm : items) {
-		const ItemType &it = Item::items[itm.first];
-		msg.add<uint16_t>(itm.first);
-		msg.addString(it.name);
-		msg.add<uint16_t>(itm.second);
+	const auto &items = imbuement->getItems();
+	if (items.size() == 1 && items[0].first == 22721) {
+		uint16_t baseID = imbuement->getBaseID();
+		if (baseID == 2) {
+			msg.addByte(2);
+			for (int i = 0; i < 2; ++i) {
+				const ItemType &it = Item::items[22721];
+				msg.add<uint16_t>(22721);
+				msg.addString(it.name);
+				msg.add<uint16_t>(6);
+			}
+		} else if (baseID == 3) {
+			msg.addByte(3);
+			for (int i = 0; i < 3; ++i) {
+				const ItemType &it = Item::items[22721];
+				msg.add<uint16_t>(22721);
+				msg.addString(it.name);
+				msg.add<uint16_t>(i < 2 ? 7 : 6);
+			}
+		} else {
+			msg.addByte(1);
+			const ItemType &it = Item::items[22721];
+			msg.add<uint16_t>(22721);
+			msg.addString(it.name);
+			msg.add<uint16_t>(items[0].second);
+		}
+	} else {
+		msg.addByte(items.size());
+		for (const auto &itm : items) {
+			const ItemType &it = Item::items[itm.first];
+			msg.add<uint16_t>(itm.first);
+			msg.addString(it.name);
+			msg.add<uint16_t>(itm.second);
+		}
 	}
 
 	msg.add<uint32_t>(baseImbuement->price);
 	msg.addByte(baseImbuement->percent);
 	msg.add<uint32_t>(baseImbuement->protectionPrice);
+	g_logger().debug("[ImbuementInfo] ID: {}, Name: {}, Price: {}, Success: {}, Resource: {}x item {}", imbuement->getID(), baseImbuement->name + " " + imbuement->getName(), baseImbuement->price, baseImbuement->percent, imbuement->getItems().size() > 0 ? imbuement->getItems()[0].second : 0, imbuement->getItems().size() > 0 ? imbuement->getItems()[0].first : 0);
 }
 
 void ProtocolGame::openImbuementWindow(const std::shared_ptr<Item> &item) {
@@ -8511,6 +8539,7 @@ void ProtocolGame::openImbuementWindow(const std::shared_ptr<Item> &item) {
 	}
 
 	std::vector<Imbuement*> imbuements = g_imbuements().getImbuements(player, item);
+	g_logger().debug("[OpenImbuementWindow] Player: {}, Item: {}, Found {} imbuements", player->getName(), item->getName(), imbuements.size());
 	phmap::flat_hash_map<uint16_t, uint16_t> needItems;
 
 	msg.add<uint16_t>(imbuements.size());
