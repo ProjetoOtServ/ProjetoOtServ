@@ -21,10 +21,15 @@ local createArea = createCombatArea(area)
 local combat = Combat()
 combat:setArea(createArea)
 
-local zone = Zone.getByName("boss.goshnar's-megalomania-purple")
-local zonePositions = zone:getPositions()
+local zoneName = "boss.goshnar's-megalomania-purple"
 
 function onTargetTile(creature, pos)
+	local zone = Zone.getByName(zoneName)
+	if not zone then
+		return true
+	end
+
+	local zonePositions = zone:getPositions()
 	for _, pos in ipairs(zonePositions) do
 		local tile = Tile(pos)
 		if tile and tile:getGround() and tile:getGround():getId() ~= 409 then

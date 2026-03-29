@@ -42,7 +42,9 @@ local exerciseWeaponsTable = {
 local dummies = Game.getDummies()
 
 local function leaveExerciseTraining(playerId, targetItem)
+	local dummyPos = nil
 	if _G.OnExerciseTraining[playerId] then
+		dummyPos = _G.OnExerciseTraining[playerId].dummyPos
 		stopEvent(_G.OnExerciseTraining[playerId].event)
 		_G.OnExerciseTraining[playerId] = nil
 	end
@@ -50,8 +52,16 @@ local function leaveExerciseTraining(playerId, targetItem)
 	local player = Player(playerId)
 	if player then
 		player:setTraining(false)
-		if targetItem then
-			targetItem:actor(false)
+		if targetItem and dummyPos then
+			local playersOnDummy = 0
+			for _, playerTraining in pairs(_G.OnExerciseTraining) do
+				if playerTraining.dummyPos == dummyPos then
+					playersOnDummy = playersOnDummy + 1
+				end
+			end
+			if playersOnDummy == 0 then
+				targetItem:actor(false)
+			end
 		end
 	end
 	return
@@ -182,18 +192,18 @@ function exerciseTraining.onUse(player, item, fromPosition, target, toPosition, 
 				player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You must be inside the house to use this dummy.")
 				return true
 			end
+		end
 
-			local playersOnDummy = 0
-			for _, playerTraining in pairs(_G.OnExerciseTraining) do
-				if playerTraining.dummyPos == targetPos then
-					playersOnDummy = playersOnDummy + 1
-				end
-
-				if playersOnDummy >= configManager.getNumber(configKeys.MAX_ALLOWED_ON_A_DUMMY) then
-					player:sendTextMessage(MESSAGE_FAILURE, "That exercise dummy is busy.")
-					return true
-				end
+		local playersOnDummy = 0
+		for _, playerTraining in pairs(_G.OnExerciseTraining) do
+			if playerTraining.dummyPos == targetPos then
+				playersOnDummy = playersOnDummy + 1
 			end
+		end
+
+		if playersOnDummy >= configManager.getNumber(configKeys.MAX_ALLOWED_ON_A_DUMMY) then
+			player:sendTextMessage(MESSAGE_FAILURE, "This dummy is currently being heavily used. Try again later.")
+			return true
 		end
 
 		if player:hasExhaustion("training-exhaustion") then

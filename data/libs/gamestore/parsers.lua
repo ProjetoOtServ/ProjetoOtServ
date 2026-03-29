@@ -213,6 +213,7 @@ end
 local function parseBuyStoreOffer(playerId, msg)
 	local player = Player(playerId)
 	local id = msg:getU32()
+	local playerKV = player:kv()
 	local offer = GameStore.getOfferById(id)
 	local productType = msg:getByte()
 	if not offer then
@@ -221,7 +222,6 @@ local function parseBuyStoreOffer(playerId, msg)
 
 	-- Cooldown Purchase
 	if productType == GameStore.ClientOfferTypes.CLIENT_STORE_OFFER_OTHER then
-		local playerKV = player:kv()
 		local purchaseCooldown = playerKV:get(GameStore.Kv.purchaseCooldown) or 0
 		local currentTime = os.time()
 		local waittime = purchaseCooldown - currentTime
