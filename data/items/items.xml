@@ -84526,7 +84526,7 @@ Granted by TibiaGoals.com"/>
 		<attribute key="showCount" value="0"/>
 		<attribute key="weight" value="250"/>
 	</item>
-	<item id="51294" article="a" name="spirit bind">
+	<item id="51293" article="a" name="spirit bind">
 		<attribute key="primarytype" value="armors"/>
 		<attribute key="armor" value="8"/>
 		<attribute key="mantra" value="12"/>
@@ -84540,7 +84540,7 @@ Granted by TibiaGoals.com"/>
 			<attribute key="level" value="75"/>
 		</attribute>
 	</item>
-	<item id="51295" name="genesis serenity armor">
+	<item id="51294" name="genesis serenity armor">
 		<attribute key="primarytype" value="armors"/>
 		<attribute key="armor" value="11"/>
 		<attribute key="mantra" value="17"/>
@@ -84665,6 +84665,24 @@ Granted by TibiaGoals.com"/>
 			<attribute key="sweeping takedown" value="base">
 				<attribute key="value" value="4"/>
 			</attribute>
+		</attribute>
+	</item>
+	<item id="51295" article="a" name="hd zaoan helmet">
+		<attribute key="primarytype" value="helmets"/>
+		<attribute key="absorbpercentphysical" value="5"/>
+		<attribute key="armor" value="9"/>
+		<attribute key="weight" value="6600"/>
+		<attribute key="imbuementslot" value="1">
+			<attribute key="mana leech" value="3"/>
+			<attribute key="skillboost axe" value="3"/>
+			<attribute key="skillboost sword" value="3"/>
+			<attribute key="skillboost club" value="3"/>
+			<attribute key="skillboost shielding" value="3"/>
+			<attribute key="skillboost distance" value="3"/>
+		</attribute>
+		<attribute key="script" value="moveevent">
+			<attribute key="slot" value="head"/>
+			<attribute key="vocation" value="Knight;true, Paladin;true, Elite Knight, Royal Paladin"/>
 		</attribute>
 	</item>
 </items>
