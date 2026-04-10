@@ -13,6 +13,7 @@
 #include "io/iologindata.hpp"
 #include "game/game.hpp"
 #include "items/bed.hpp"
+#include "items/items.hpp"
 
 void IOMapSerialize::loadHouseItems(Map* map) {
 	Benchmark bm_context;
@@ -156,7 +157,7 @@ bool IOMapSerialize::loadItem(PropStream &propStream, const std::shared_ptr<Cyli
 	}
 
 	const ItemType &iType = Item::items[id];
-	if (iType.isBed() || iType.movable || !tile || iType.isCarpet() || iType.isTrashHolder()) {
+	if (iType.isBed() || iType.movable || iType.isWrappable() || !tile || iType.isCarpet() || iType.isTrashHolder()) {
 		// create a new item
 		auto item = Item::CreateItem(id);
 		if (item) {

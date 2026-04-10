@@ -84685,4 +84685,8 @@ Granted by TibiaGoals.com"/>
 			<attribute key="vocation" value="Knight;true, Paladin;true, Elite Knight, Royal Paladin"/>
 		</attribute>
 	</item>
+	<item id="51296" article="a" name="parede lego custom">
+    <attribute key="wrapableto" value="23398"/>
+    <!-- outras propriedades necessárias -->
+</item>
 </items>
