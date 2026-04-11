@@ -616,7 +616,16 @@ ReturnValue Tile::queryAdd(int32_t, const std::shared_ptr<Thing> &thing, uint32_
 		}
 
 		if (const auto &monster = creature->getMonster()) {
-			if (hasFlag(TILESTATE_PROTECTIONZONE | TILESTATE_FLOORCHANGE | TILESTATE_TELEPORT) && (!monster->isFamiliar() || (monster->isFamiliar() && monster->getMaster() && monster->getMaster()->getAttackedCreature()))) {
+			// Verifica se eh PZ, mas ignora se for casa sem dono
+			bool isProtectionZone = hasFlag(TILESTATE_PROTECTIONZONE);
+			if (isProtectionZone) {
+				if (const auto &house = getHouse()) {
+					if (house->isPublic()) {
+						isProtectionZone = false; // Casa sem dono nao tem protecao
+					}
+				}
+			}
+			if ((isProtectionZone || hasFlag(TILESTATE_FLOORCHANGE | TILESTATE_TELEPORT)) && (!monster->isFamiliar() || (monster->isFamiliar() && monster->getMaster() && monster->getMaster()->getAttackedCreature()))) {
 				return RETURNVALUE_NOTPOSSIBLE;
 			}
 

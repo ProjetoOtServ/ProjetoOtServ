@@ -848,7 +848,16 @@ std::unordered_set<PlayerIcon> Player::getClientIcons() {
 	}
 
 	const auto &tile = getTile();
-	if (tile && tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+	bool isProtectionZone = tile && tile->hasFlag(TILESTATE_PROTECTIONZONE);
+	// Se for casa sem dono (publica), nao eh zona de protecao
+	if (isProtectionZone && tile) {
+		if (const auto &house = tile->getHouse()) {
+			if (house->isPublic()) {
+				isProtectionZone = false;
+			}
+		}
+	}
+	if (isProtectionZone) {
 		if (icons.size() < 9) {
 			icons.insert(PlayerIcon::Pigeon);
 		}
@@ -1360,7 +1369,16 @@ bool Player::canWalkthrough(const std::shared_ptr<Creature> &creature) {
 
 	if (player) {
 		const auto &playerTile = player->getTile();
-		if (!playerTile || (!playerTile->hasFlag(TILESTATE_NOPVPZONE) && !playerTile->hasFlag(TILESTATE_PROTECTIONZONE) && player->getLevel() > static_cast<uint32_t>(g_configManager().getNumber(PROTECTION_LEVEL)) && g_game().getWorldType() != WORLD_TYPE_NO_PVP)) {
+		bool playerInProtectionZone = playerTile && playerTile->hasFlag(TILESTATE_PROTECTIONZONE);
+		// Se for casa sem dono, nao conta como PZ
+		if (playerInProtectionZone && playerTile) {
+			if (const auto &house = playerTile->getHouse()) {
+				if (house->isPublic()) {
+					playerInProtectionZone = false;
+				}
+			}
+		}
+		if (!playerTile || (!playerTile->hasFlag(TILESTATE_NOPVPZONE) && !playerInProtectionZone && player->getLevel() > static_cast<uint32_t>(g_configManager().getNumber(PROTECTION_LEVEL)) && g_game().getWorldType() != WORLD_TYPE_NO_PVP)) {
 			return false;
 		}
 
@@ -7550,7 +7568,16 @@ bool Player::toggleMount(bool mount) {
 		}
 
 		const auto &tile = getTile();
-		if (!g_configManager().getBoolean(TOGGLE_MOUNT_IN_PZ) && !group->access && tile && tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+		bool isProtectionZone = tile && tile->hasFlag(TILESTATE_PROTECTIONZONE);
+		// Se for casa sem dono (publica), permite montar
+		if (isProtectionZone && tile) {
+			if (const auto &house = tile->getHouse()) {
+				if (house->isPublic()) {
+					isProtectionZone = false;
+				}
+			}
+		}
+		if (!g_configManager().getBoolean(TOGGLE_MOUNT_IN_PZ) && !group->access && isProtectionZone) {
 			sendCancelMessage(RETURNVALUE_ACTIONNOTPERMITTEDINPROTECTIONZONE);
 			return false;
 		}

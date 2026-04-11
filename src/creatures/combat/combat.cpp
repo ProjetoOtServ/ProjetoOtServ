@@ -285,7 +285,16 @@ ReturnValue Combat::canDoCombat(const std::shared_ptr<Creature> &caster, const s
 		}
 	}
 
-	if (aggressive && tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+	bool isProtectionZone = tile->hasFlag(TILESTATE_PROTECTIONZONE);
+	// Se for casa sem dono, nao eh zona de protecao
+	if (isProtectionZone) {
+		if (const auto &house = tile->getHouse()) {
+			if (house->isPublic()) {
+				isProtectionZone = false;
+			}
+		}
+	}
+	if (aggressive && isProtectionZone) {
 		return RETURNVALUE_ACTIONNOTPERMITTEDINPROTECTIONZONE;
 	}
 
@@ -347,7 +356,16 @@ ReturnValue Combat::canDoCombat(const std::shared_ptr<Creature> &attacker, const
 		if (tile->hasProperty(CONST_PROP_BLOCKPROJECTILE)) {
 			return RETURNVALUE_NOTENOUGHROOM;
 		}
-		if (targetPlayer && tile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+		bool isProtectionZone = tile->hasFlag(TILESTATE_PROTECTIONZONE);
+		// Se for casa sem dono, nao eh zona de protecao
+		if (isProtectionZone) {
+			if (const auto &house = tile->getHouse()) {
+				if (house->isPublic()) {
+					isProtectionZone = false;
+				}
+			}
+		}
+		if (targetPlayer && isProtectionZone) {
 			const auto permittedOnPz = targetPlayer->hasPermittedConditionInPZ();
 			return permittedOnPz ? RETURNVALUE_NOERROR : RETURNVALUE_ACTIONNOTPERMITTEDINPROTECTIONZONE;
 		}

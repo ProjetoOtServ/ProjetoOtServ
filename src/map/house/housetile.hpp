@@ -34,6 +34,8 @@ public:
 		return house;
 	}
 
+	bool isPublicHouse() const override;
+
 private:
 	void updateHouse(const std::shared_ptr<Item> &item) const;
 

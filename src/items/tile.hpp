@@ -121,6 +121,10 @@ public:
 		return nullptr;
 	}
 
+	virtual bool isPublicHouse() const {
+		return false;
+	}
+
 	int32_t getThrowRange() const final {
 		return 0;
 	}
@@ -184,7 +188,7 @@ public:
 	}
 
 	ZoneType_t getZoneType() const {
-		if (hasFlag(TILESTATE_PROTECTIONZONE)) {
+		if (hasFlag(TILESTATE_PROTECTIONZONE) && !isPublicHouse()) {
 			return ZONE_PROTECTION;
 		} else if (hasFlag(TILESTATE_NOPVPZONE)) {
 			return ZONE_NOPVP;

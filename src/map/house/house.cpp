@@ -24,7 +24,9 @@ House::House(uint32_t houseId) :
 	id(houseId) { }
 
 void House::addTile(const std::shared_ptr<HouseTile> &tile) {
-	tile->setFlag(TILESTATE_PROTECTIONZONE);
+	if (!isPublic()) {
+		tile->setFlag(TILESTATE_PROTECTIONZONE);
+	}
 	houseTiles.push_back(tile);
 	updateDoorDescription();
 }
@@ -146,6 +148,15 @@ void House::setOwner(uint32_t guid, bool updateDatabase /* = true*/, const std::
 			ownerName = name;
 			ownerAccountId = result->getNumber<uint32_t>("account_id");
 			m_state = CyclopediaHouseState::Rented;
+		}
+	}
+
+	// Atualiza zona de proteção em todos os tiles
+	for (auto &tile : houseTiles) {
+		if (isPublic()) {
+			tile->resetFlag(TILESTATE_PROTECTIONZONE);
+		} else {
+			tile->setFlag(TILESTATE_PROTECTIONZONE);
 		}
 	}
 
@@ -325,6 +336,8 @@ bool House::transferToDepot(const std::shared_ptr<Player> &player, const std::sh
 				handleWrapableItem(moveItemList, item, player, tile);
 			} else if (item->isPickupable()) {
 				moveItemList.push_back(item);
+			} else if (item->isMovable()) {
+				moveItemList.push_back(item);
 			} else if (const auto &container = item->getContainer()) {
 				collectMovableItemsFromContainer(moveItemList, container, player, tile);
 			}
@@ -468,6 +481,8 @@ void House::collectMovableItemsFromContainer(ItemList &moveItemList, const std::
 		if (item->isWrapable()) {
 			handleWrapableItem(moveItemList, item, player, houseTile);
 		} else if (item->isPickupable()) {
+			moveItemList.push_back(item);
+		} else if (item->isMovable()) {
 			moveItemList.push_back(item);
 		} else if (const auto &innerContainer = item->getContainer()) {
 			collectMovableItemsFromContainer(moveItemList, innerContainer, player, houseTile);
@@ -820,11 +835,19 @@ bool Door::canUse(const std::shared_ptr<Player> &player) const {
 		return true;
 	}
 
+	if (house->isPublic()) {
+		return true;
+	}
+
 	if (house->getHouseAccessLevel(player) >= HOUSE_SUBOWNER) {
 		return true;
 	}
 
 	return accessList->isInList(player);
+}
+
+bool Door::isDoorPublic() const {
+	return house && house->isPublic();
 }
 
 void Door::setAccessList(const std::string &textlist) {

@@ -6295,7 +6295,16 @@ void Game::playerChangeOutfit(uint32_t playerId, Outfit_t outfit, bool setMount,
 			return;
 		}
 
-		if (!g_configManager().getBoolean(TOGGLE_MOUNT_IN_PZ) && playerTile->hasFlag(TILESTATE_PROTECTIONZONE)) {
+		bool isProtectionZone = playerTile->hasFlag(TILESTATE_PROTECTIONZONE);
+		// Se for casa sem dono, permite montar
+		if (isProtectionZone) {
+			if (const auto &house = playerTile->getHouse()) {
+				if (house->isPublic()) {
+					isProtectionZone = false;
+				}
+			}
+		}
+		if (!g_configManager().getBoolean(TOGGLE_MOUNT_IN_PZ) && isProtectionZone) {
 			outfit.lookMount = 0;
 		}
 

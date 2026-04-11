@@ -135,3 +135,7 @@ ReturnValue HouseTile::queryRemove(const std::shared_ptr<Thing> &thing, uint32_t
 	}
 	return Tile::queryRemove(thing, count, flags);
 }
+
+bool HouseTile::isPublicHouse() const {
+	return house && house->isPublic();
+}

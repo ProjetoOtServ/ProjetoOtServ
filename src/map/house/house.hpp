@@ -67,6 +67,7 @@ public:
 	}
 
 	bool canUse(const std::shared_ptr<Player> &player) const;
+	bool isDoorPublic() const;
 
 	void setAccessList(const std::string &textlist);
 	bool getAccessList(std::string &list) const;
@@ -115,6 +116,7 @@ public:
 	bool getAccessList(uint32_t listId, std::string &list) const;
 
 	bool isInvited(const std::shared_ptr<Player> &player) const {
+		if (isPublic()) return true;
 		return getHouseAccessLevel(player) != HOUSE_NOT_INVITED;
 	}
 
@@ -155,6 +157,10 @@ public:
 	void setOwner(uint32_t guid, bool updateDatabase = true, const std::shared_ptr<Player> &player = nullptr);
 	uint32_t getOwner() const {
 		return owner;
+	}
+
+	bool isPublic() const {
+		return owner == 0;
 	}
 
 	void setPaidUntil(time_t paid) {
