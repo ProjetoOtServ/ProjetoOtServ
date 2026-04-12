@@ -13,6 +13,7 @@ local modules = {
 	"house",
 	"house_decorations",
 	"house_furniture",
+	"house_construction",
 	"beds",
 	"house_upgrades",
 	"house_hirelings",
