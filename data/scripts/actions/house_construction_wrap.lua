@@ -98,7 +98,7 @@ function wrapAction.onUse(player, item, fromPosition, target, toPosition, isHotk
     end
     
     -- Check if player is the house owner
-    if house:getOwner() ~= player:getGuid() then
+    if house:getOwnerGuid() ~= player:getGuid() then
         player:sendCancelMessage("You can only wrap construction materials in your own house.")
         return true
     end

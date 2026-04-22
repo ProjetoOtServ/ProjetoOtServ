@@ -8,6 +8,7 @@ HIRELING_SKILLS = {
 	COOKING = { 1002, "cooker" },
 	STEWARD = { 1003, "steward" },
 	TRADER = { 1004, "trader" },
+	SUPERTRADER = { 1005, "supertrader" },
 }
 
 HIRELING_OUTFITS = {
@@ -290,6 +291,92 @@ function Hireling:hasSkill(skillName)
 	end
 	local player = Player(self:getOwnerId()) or Game.getOfflinePlayer(self:getOwnerId())
 	return hasSkillFromPlayer(player)
+end
+
+-- Super Trader System Functions
+function Hireling:canUseSuperTrader()
+	-- Precisa ter AMBOS: supertrader E banker
+	return self:hasSkill("supertrader") and self:hasSkill("banker")
+end
+
+function Hireling:canAcquireSuperTrader()
+	-- Só pode comprar se já tiver banker
+	return self:hasSkill("banker")
+end
+
+function Hireling:addTaxes(amount)
+	if amount <= 0 then 
+		logger.warning("[Hireling][addTaxes] Attempted to add invalid amount: {}", amount)
+		return 
+	end
+	
+	logger.info("[Hireling][addTaxes] Adding {} gold in taxes for hireling '{}', owner ID: {}", 
+		amount, self:getName(), self:getOwnerId())
+	
+	local player = Player(self:getOwnerId()) or Game.getOfflinePlayer(self:getOwnerId())
+	if not player then 
+		logger.error("[Hireling][addTaxes] Player with GUID {} not found!", self:getOwnerId())
+		return 
+	end
+	
+	local current = player:kv():scoped("hireling-taxes"):get("stored") or 0
+	local newTotal = current + amount
+	player:kv():scoped("hireling-taxes"):set("stored", newTotal)
+	
+	logger.info("[Hireling][addTaxes] Player '{}' tax balance: {} -> {} (+{})", 
+		player:getName(), current, newTotal, amount)
+	
+	-- Notificar dono se online e taxa significativa
+	local onlineOwner = Player(self:getOwnerId())
+	if onlineOwner and amount >= 100 then
+		onlineOwner:sendTextMessage(MESSAGE_EVENT_ADVANCE, 
+			string.format("[Hireling] Your hireling earned %i gold in trade fees! Total stored: %i", 
+			amount, newTotal))
+	end
+end
+
+function Hireling:getStoredTaxes()
+	local player = Player(self:getOwnerId()) or Game.getOfflinePlayer(self:getOwnerId())
+	if not player then 
+		logger.warning("[Hireling][getStoredTaxes] Player with GUID {} not found (offline or doesn't exist)", self:getOwnerId())
+		return 0 
+	end
+	
+	local taxes = player:kv():scoped("hireling-taxes"):get("stored") or 0
+	logger.debug("[Hireling][getStoredTaxes] Player '{}' has {} gold in stored taxes", player:getName(), taxes)
+	return taxes
+end
+
+function Hireling:withdrawTaxes()
+	logger.info("[Hireling][withdrawTaxes] Called for hireling '{}', owner ID: {}", self:getName(), self:getOwnerId())
+	
+	local player = Player(self:getOwnerId())
+	if not player then
+		logger.error("[Hireling][withdrawTaxes] Player with GUID {} is not online!", self:getOwnerId())
+		return false, "You must be online to collect taxes."
+	end
+	
+	logger.info("[Hireling][withdrawTaxes] Player '{}' is online", player:getName())
+	
+	local amount = self:getStoredTaxes()
+	logger.info("[Hireling][withdrawTaxes] Stored taxes amount: {}", amount)
+	
+	if amount <= 0 then
+		logger.warning("[Hireling][withdrawTaxes] No taxes to collect for player '{}'", player:getName())
+		return false, "You don't have any taxes to collect."
+	end
+	
+	-- Adicionar gold ao jogador
+	logger.info("[Hireling][withdrawTaxes] Adding {} gold to player '{}'", amount, player:getName())
+	local added = player:addMoney(amount)
+	logger.info("[Hireling][withdrawTaxes] addMoney() returned: {}", tostring(added))
+	
+	-- Resetar taxas
+	logger.info("[Hireling][withdrawTaxes] Resetting stored taxes to 0")
+	player:kv():scoped("hireling-taxes"):set("stored", 0)
+	
+	logger.info("[Hireling][withdrawTaxes] Success! Player '{}' collected {} gold", player:getName(), amount)
+	return true, amount
 end
 
 function Hireling:setCreature(cid)

@@ -796,6 +796,443 @@ function createHirelingType(HirelingName)
 	npcHandler:setCallback(CALLBACK_MESSAGE_DEFAULT, creatureSayCallback)
 	npcHandler:addModule(FocusModule:new(), npcConfig.name, true, true, true)
 
+	-- ========================[[ SUPER TRADER SYSTEM ]] ========================== --
+	-- Load Super Trader items
+	dofile("data-otservbr-global/npc/lib/supertrader_items.lua")
+	
+	-- Super Trader Keywords
+	local SUPERTRADER_KEYWORDS = {
+		"supertrade", "supertrader", "super trade", "super trader",
+		"trade super", "supercommerce", "super commerce"
+	}
+	
+	-- Check if message contains super trader keywords
+	local function isSuperTraderKeyword(message)
+		local lowerMsg = message:lower()
+		for _, keyword in ipairs(SUPERTRADER_KEYWORDS) do
+			if lowerMsg == keyword or MsgContains(lowerMsg, keyword) then
+				return true
+			end
+		end
+		return false
+	end
+	
+	-- Open Super Trade window
+	local function openSuperTrade(npc, player)
+		logger.info("[SUPERTRADER][openSuperTrade] Player '{}' attempting to open Super Trade", player:getName())
+		
+		if not hireling then
+			logger.error("[SUPERTRADER][openSuperTrade] Hireling is nil!")
+			return false
+		end
+		
+		-- Check prerequisite: BANKER
+		if not hireling:hasSkill("banker") then
+			logger.info("[SUPERTRADER][openSuperTrade] Player '{}' - Hireling missing BANKER skill", player:getName())
+			npcHandler:say("I cannot become a Super Trader without the Banker skill. Please ask my master to upgrade me to Banker first in the Store!", npc, player)
+			return true
+		end
+		
+		-- Check if has Super Trader skill
+		if not hireling:hasSkill("supertrader") then
+			logger.info("[SUPERTRADER][openSuperTrade] Player '{}' - Hireling missing SUPERTRADER skill", player:getName())
+			npcHandler:say("I'm not a Super Trader yet! My master needs to unlock this skill for me in the Store. Remember: I need the Banker skill first!", npc, player)
+			return true
+		end
+		
+		logger.info("[SUPERTRADER][openSuperTrade] Opening shop window for player '{}' with {} items", player:getName(), #SUPERTRADER_SHOP_ITEMS)
+		
+		-- Open shop window (only selling to NPC)
+		npcHandler:say("Welcome to my trading post! I can buy various rare items from your adventures. Browse my offers and sell what you don't need.", npc, player)
+		npc:openShopWindowTable(player, SUPERTRADER_SHOP_ITEMS)
+		
+		return true
+	end
+	
+	-- Process sell with tax
+	local function processSuperTraderSell(npc, player, itemId, amount, name, totalCost)
+		logger.info("[SUPERTRADER][processSuperTraderSell] Player '{}' selling {}x {} (ID: {}) for {} gold", 
+			player:getName(), amount, name, itemId, totalCost)
+		
+		if not hireling or not hireling:canUseSuperTrader() then
+			logger.error("[SUPERTRADER][processSuperTraderSell] Hireling nil or cannot use SuperTrader!")
+			return false
+		end
+		
+		local basePrice = totalCost
+		local tax = math.ceil(basePrice * 0.05)  -- 5% tax
+		local playerReceives = basePrice - tax
+		
+		logger.info("[SUPERTRADER][processSuperTraderSell] Base: {}, Tax: {}, Player receives: {}", basePrice, tax, playerReceives)
+		
+		-- Give money to player (minus tax)
+		local added = player:addMoney(playerReceives)
+		logger.info("[SUPERTRADER][processSuperTraderSell] Added money to player: {}", added)
+		
+		-- Add tax to hireling owner
+		hireling:addTaxes(tax)
+		logger.info("[SUPERTRADER][processSuperTraderSell] Added tax: {} gold", tax)
+		
+		-- Remove items from player
+		local removed = player:removeItem(itemId, amount)
+		logger.info("[SUPERTRADER][processSuperTraderSell] Removed items: {}", removed)
+		
+		-- Send message
+		player:sendTextMessage(MESSAGE_TRADE, string.format(
+			"Sold %ix %s. Base: %i gold | Tax: %i gold | You receive: %i gold",
+			amount, name, basePrice, tax, playerReceives
+		))
+		
+		logger.info("[SUPERTRADER][processSuperTraderSell] Sale completed successfully")
+		return true
+	end
+	
+	-- ==================== BLACKLIST SYSTEM ====================
+	
+	-- Get player's blacklist
+	local function getPlayerBlacklist(player)
+		local blacklist = player:kv():get("supertrader-blacklist") or {}
+		if type(blacklist) ~= "table" then
+			blacklist = {}
+		end
+		return blacklist
+	end
+	
+	-- Save player's blacklist
+	local function savePlayerBlacklist(player, blacklist)
+		player:kv():set("supertrader-blacklist", blacklist)
+	end
+	
+	-- Check if item is blacklisted
+	local function isItemBlacklisted(player, itemId)
+		local blacklist = getPlayerBlacklist(player)
+		return blacklist[itemId] == true
+	end
+	
+	-- Add item to blacklist
+	local function addToBlacklist(player, itemId, itemName)
+		local blacklist = getPlayerBlacklist(player)
+		blacklist[itemId] = true
+		savePlayerBlacklist(player, blacklist)
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, 
+			string.format("[Super Trader] Added '%s' to your sell blacklist.", itemName or "item"))
+	end
+	
+	-- Remove item from blacklist
+	local function removeFromBlacklist(player, itemId, itemName)
+		local blacklist = getPlayerBlacklist(player)
+		blacklist[itemId] = nil
+		savePlayerBlacklist(player, blacklist)
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, 
+			string.format("[Super Trader] Removed '%s' from your sell blacklist.", itemName or "item"))
+	end
+	
+	-- Clear entire blacklist
+	local function clearBlacklist(player)
+		savePlayerBlacklist(player, {})
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "[Super Trader] Your sell blacklist has been cleared.")
+	end
+	
+	-- Show blacklist to player
+	local function showBlacklist(npc, player)
+		local blacklist = getPlayerBlacklist(player)
+		local count = 0
+		local items = {}
+		
+		for itemId, _ in pairs(blacklist) do
+			count = count + 1
+			local itemType = ItemType(itemId)
+			if itemType then
+				table.insert(items, itemType:getName())
+			end
+		end
+		
+		if count == 0 then
+			npcHandler:say("Your blacklist is empty, master. All items I can buy will be shown in the trade window.", npc, player)
+		else
+			npcHandler:say(string.format("Master, you have %d items on your blacklist: %s. These items will not appear in my buy offers.", 
+				count, table.concat(items, ", ")), npc, player)
+		end
+		return true
+	end
+	
+	-- Sell all items in backpack (except blacklisted)
+	local function sellAllItems(npc, player)
+		if not hireling or not hireling:canUseSuperTrader() then
+			npcHandler:say("I don't have the Super Trader skill yet!", npc, player)
+			return true
+		end
+		
+		local backpack = player:getSlotItem(CONST_SLOT_BACKPACK)
+		if not backpack then
+			npcHandler:say("Master, you don't have a backpack!", npc, player)
+			return true
+		end
+		
+		local soldItems = {}
+		local totalBase = 0
+		local totalTax = 0
+		local totalReceived = 0
+		local blacklist = getPlayerBlacklist(player)
+		
+		-- Iterate through all items in backpack
+		for i = 0, backpack:getSize() - 1 do
+			local item = backpack:getItem(i)
+			if item then
+				local itemId = item:getId()
+				local amount = item:getCount()
+				
+				-- Check if item is buyable and not blacklisted
+				if not blacklist[itemId] then
+					local price = GetSuperTraderSellPrice(itemId)
+					if price and price > 0 then
+						local itemType = ItemType(itemId)
+						local name = itemType and itemType:getName() or "unknown"
+						local basePrice = price * amount
+						local tax = math.ceil(basePrice * 0.05)
+						local playerReceives = basePrice - tax
+						
+						-- Sell item
+						player:removeItem(itemId, amount)
+						player:addMoney(playerReceives)
+						hireling:addTaxes(tax)
+						
+						table.insert(soldItems, string.format("%dx %s", amount, name))
+						totalBase = totalBase + basePrice
+						totalTax = totalTax + tax
+						totalReceived = totalReceived + playerReceives
+					end
+				end
+			end
+		end
+		
+		if #soldItems == 0 then
+			npcHandler:say("Master, I couldn't find any items to buy from your backpack. Either your items are not in my buy list, or they're all blacklisted.", npc, player)
+		else
+			local msg = string.format("Master, I've bought %d item types from your backpack!\n\nBase value: %d gold\nTax (5%%): %d gold\nYou received: %d gold", 
+				#soldItems, totalBase, totalTax, totalReceived)
+			npcHandler:say(msg, npc, player)
+			
+			-- Log to server channel
+			player:sendTextMessage(MESSAGE_EVENT_ADVANCE, 
+				string.format("[Super Trader] Sold %d item types. Total: %d gold | Tax: %d gold | Received: %d gold",
+				#soldItems, totalBase, totalTax, totalReceived))
+		end
+		
+		return true
+	end
+	
+	-- ==================== END BLACKLIST SYSTEM ====================
+	
+	-- Collect taxes command
+	local function collectTaxes(npc, player)
+		logger.info("[SUPERTRADER][collectTaxes] Player '{}' attempting to collect taxes", player:getName())
+		
+		if not hireling then
+			logger.error("[SUPERTRADER][collectTaxes] Hireling is nil!")
+			return false
+		end
+		
+		-- Check if is owner
+		if player:getGuid() ~= hireling:getOwnerId() then
+			logger.info("[SUPERTRADER][collectTaxes] Player '{}' is not owner (owner: {})", player:getName(), hireling:getOwnerId())
+			npcHandler:say("Only my master can collect my earnings!", npc, player)
+			return true
+		end
+		
+		-- Check if has Super Trader system active
+		if not hireling:canUseSuperTrader() then
+			logger.info("[SUPERTRADER][collectTaxes] Hireling cannot use SuperTrader")
+			npcHandler:say("I don't collect any fees yet. I need both Banker and Super Trader skills for that!", npc, player)
+			return true
+		end
+		
+		local taxes = hireling:getStoredTaxes()
+		logger.info("[SUPERTRADER][collectTaxes] Stored taxes: {} gold", taxes)
+		
+		if taxes <= 0 then
+			logger.info("[SUPERTRADER][collectTaxes] No taxes to collect")
+			npcHandler:say("You don't have any taxes to collect yet, master. Make some trades first!", npc, player)
+			return true
+		end
+		
+		-- Show balance before collecting
+		npcHandler:say(string.format("Master, I am currently holding %i gold in trade fees for you. Withdrawing now...", taxes), npc, player)
+		
+		-- Withdraw taxes
+		logger.info("[SUPERTRADER][collectTaxes] Calling withdrawTaxes()...")
+		local success, result = hireling:withdrawTaxes()
+		logger.info("[SUPERTRADER][collectTaxes] withdrawTaxes() returned: success={}, result={}", tostring(success), tostring(result))
+		
+		if success then
+			local msg = string.format("[Hireling Super Trader] Collected %i gold in trade fees from your hireling '%s'.", result, hireling:getName())
+			
+			-- Send to NPC chat
+			npcHandler:say(string.format("Done! I've transferred %i gold to your balance. Thank you for using my services, master!", result), npc, player)
+			
+			-- Send to server log channel (orange message)
+			player:sendTextMessage(MESSAGE_EVENT_ADVANCE, msg)
+			
+			-- Also send to trade channel
+			player:sendTextMessage(MESSAGE_TRADE, string.format("Received %i gold from hireling '%s' trade fees.", result, hireling:getName()))
+		else
+			logger.error("[SUPERTRADER][collectTaxes] withdrawTaxes() failed: {}", tostring(result))
+			npcHandler:say(result or "I couldn't transfer the gold right now. Please try again later.", npc, player)
+		end
+		
+		return true
+	end
+	
+	-- Override onSellItem for Super Trader
+	local originalOnSellItem = npcType.onSellItem
+	npcType.onSellItem = function(npc, player, itemId, subtype, amount, ignore, name, totalCost)
+		-- Check if this is a Super Trader transaction
+		if hireling and hireling:canUseSuperTrader() and IsSuperTraderBuyable(itemId) then
+			return processSuperTraderSell(npc, player, itemId, amount, name, totalCost)
+		end
+		
+		-- Default behavior
+		return originalOnSellItem(npc, player, itemId, subtype, amount, ignore, name, totalCost)
+	end
+	
+	-- Override onBuyItem for tax on purchases
+	local originalOnBuyItem = npcType.onBuyItem
+	npcType.onBuyItem = function(npc, player, itemId, subType, amount, ignore, inBackpacks, totalCost)
+		-- Check if hireling has Super Trader + Banker
+		if hireling and hireling:canUseSuperTrader() then
+			local basePrice = totalCost
+			local tax = math.ceil(basePrice * 0.03)  -- 3% tax
+			local totalWithTax = basePrice + tax
+			
+			-- Check if player has enough money
+			if player:getMoney() < totalWithTax then
+				player:sendCancelMessage(string.format("You need %i gold (including %i gold tax).", totalWithTax, tax))
+				return false
+			end
+			
+			-- Remove money with tax
+			player:removeMoney(totalWithTax)
+			
+			-- Add tax to owner
+			hireling:addTaxes(tax)
+			
+			-- Deliver item
+			npc:sellItem(player, itemId, amount, subType, 0, ignore, inBackpacks)
+			
+			-- Message
+			player:sendTextMessage(MESSAGE_TRADE, string.format(
+				"Bought %ix %s. Base: %i gold | Tax: %i gold | Total: %i gold",
+				amount, ItemType(itemId):getName(), basePrice, tax, totalWithTax
+			))
+			
+			return true
+		end
+		
+		-- Default behavior (no tax)
+		return originalOnBuyItem(npc, player, itemId, subType, amount, ignore, inBackpacks, totalCost)
+	end
+	
+	-- Add Super Trader keywords
+	for _, keyword in ipairs(SUPERTRADER_KEYWORDS) do
+		keywordHandler:addKeyword({keyword}, function(npc, creature, message, keywords, node)
+			return openSuperTrade(npc, Player(creature))
+		end)
+	end
+	
+	-- Add collect keyword - ONLY for collecting taxes
+	keywordHandler:addKeyword({"collect"}, function(npc, creature, message, keywords, node)
+		logger.info("[SUPERTRADER][keyword] Player '{}' triggered 'collect' command", Player(creature):getName())
+		return collectTaxes(npc, Player(creature))
+	end)
+	
+	-- Profits keyword to check taxes balance (without collecting)
+	keywordHandler:addKeyword({"profits"}, function(npc, creature, message, keywords, node)
+		logger.info("[SUPERTRADER][profits] Player '{}' triggered profits check", Player(creature):getName())
+		local player = Player(creature)
+		if not hireling then
+			logger.error("[SUPERTRADER][profits] Hireling is nil!")
+			npcHandler:say("I am not ready yet.", npc, creature)
+			return true
+		end
+		
+		if player:getGuid() ~= hireling:getOwnerId() then
+			logger.info("[SUPERTRADER][profits] Player '{}' is not the owner (owner: {})", player:getName(), hireling:getOwnerId())
+			npcHandler:say("Only my master can check my balance!", npc, creature)
+			return true
+		end
+		
+		if not hireling:canUseSuperTrader() then
+			logger.info("[SUPERTRADER][profits] Hireling cannot use SuperTrader")
+			npcHandler:say("I don't have any balance to check, master. I need the Super Trader skill!", npc, creature)
+			return true
+		end
+		
+		local taxes = hireling:getStoredTaxes()
+		logger.info("[SUPERTRADER][profits] Stored taxes: {} gold", taxes)
+		
+		if taxes > 0 then
+			npcHandler:say(string.format("Master, I am currently holding %i gold in trade fees. Say 'collect' to withdraw them!", taxes), npc, creature)
+			
+			-- Also send to server log
+			player:sendTextMessage(MESSAGE_EVENT_ADVANCE, 
+				string.format("[Hireling Super Trader] Balance check: %i gold in fees (Hireling: %s)", taxes, hireling:getName()))
+		else
+			npcHandler:say("Master, I don't have any trade fees stored yet. Make some trades and I'll collect the fees for you!", npc, creature)
+		end
+		return true
+	end)
+	
+	-- Status keyword to check taxes
+	keywordHandler:addKeyword({"status"}, function(npc, creature, message, keywords, node)
+		local player = Player(creature)
+		if player:getGuid() == hireling:getOwnerId() and hireling:canUseSuperTrader() then
+			local taxes = hireling:getStoredTaxes()
+			if taxes > 0 then
+				npcHandler:say(string.format("Master, you have %i gold in uncollected trade fees. Say 'collect' to withdraw them!", taxes), npc, creature)
+			else
+				npcHandler:say("Master, you don't have any trade fees to collect yet.", npc, creature)
+			end
+		else
+			npcHandler:say("I'm working hard for my master!", npc, creature)
+		end
+		return true
+	end)
+	
+	-- REMOVED: sellall command - "Sell All" button is handled by client UI
+	-- REMOVED: blacklist commands - handled by client context menu (Ctrl+Click)
+	
+	-- Help keyword for super trader
+	keywordHandler:addKeyword({"help", "commands", "ajuda", "comandos"}, function(npc, creature, message, keywords, node)
+		logger.info("[SUPERTRADER][help] Player '{}' requested help", Player(creature):getName())
+		
+		local player = Player(creature)
+		local isOwner = player:getGuid() == hireling:getOwnerId()
+		
+		local msg = "Available commands:\n"
+		msg = msg .. "{goods} - Browse items to buy\n"
+		msg = msg .. "{bank} - Access your bank account\n"
+		msg = msg .. "{stash} - Open your stash\n"
+		msg = msg .. "{food} - Order food"
+		
+		if hireling and hireling:canUseSuperTrader() then
+			msg = msg .. "\n\nSuper Trader commands:\n"
+			msg = msg .. "{supertrade} - Sell rare items\n"
+			msg = msg .. "Use 'Sell All' button in trade window to sell all items\n"
+			msg = msg .. "Ctrl+Click items to add/remove from blacklist"
+			
+			if isOwner then
+				msg = msg .. "\n\nOwner commands:\n"
+				msg = msg .. "{profits} - Check stored fees\n"
+				msg = msg .. "{collect} - Collect trade fees"
+			end
+		end
+		
+		npcHandler:say(msg, npc, creature)
+		return true
+	end)
+	
+	-- ----------------------[[ END SUPER TRADER SYSTEM ]] -------------------------
+
 	npcType:register(npcConfig)
 end
 

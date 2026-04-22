@@ -17,6 +17,7 @@ local modules = {
 	"beds",
 	"house_upgrades",
 	"house_hirelings",
+	"house_hireling_skills",
 	"house_hireling_dresses",
 	"boost",
 	"extras",

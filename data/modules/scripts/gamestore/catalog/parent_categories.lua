@@ -15,7 +15,7 @@ return {
 		icons = { "Category_HouseTools.png" },
 		name = "Houses",
 		rookgaard = true,
-		subclasses = { "Decorations", "Furniture", "Construction Materials", "Upgrades", "Hirelings", "Hirelings Dresses" },
+		subclasses = { "Decorations", "Furniture", "Construction Materials", "Upgrades", "Hirelings", "Hireling Skills", "Hirelings Dresses" },
 	},
 	extras = {
 		icons = { "Category_Extras.png" },
