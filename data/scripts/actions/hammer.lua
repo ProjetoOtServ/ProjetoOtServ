@@ -39,6 +39,11 @@ local settingTable = {
 	},
 }
 
+-- Carregamento forçado da LIB se necessário (Canary fix)
+if not CONSTRUCTION_SITE_ID then
+    pcall(function() dofile("data/scripts/lib/construction_configs.lua") end)
+end
+
 local hammer = Action()
 
 function hammer.onUse(player, item, fromPosition, target, toPosition, isHotkey)
@@ -46,21 +51,59 @@ function hammer.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 		return false
 	end
 
-	local CONSTRUCTION_SITE_ID = 23398
-	if target:getId() == CONSTRUCTION_SITE_ID and target:getActionId() == 60000 then
+	if target:getId() == CONSTRUCTION_SITE_ID and target:getActionId() == CONSTRUCTION_AID then
 		local p = target:getCustomAttribute("plankCurrent") or 0
 		local n = target:getCustomAttribute("nailCurrent") or 0
+		local originalGround = target:getCustomAttribute("originalGround")
+		local pos = target:getPosition()
 		
-		if p > 0 then player:addItem(5300, p) end
-		if n > 0 then player:addItem(953, n) end
+		if p > 0 then player:addItem(MATERIAL_PLANK, p) end
+		if n > 0 then player:addItem(MATERIAL_NAIL, n) end
 		
 		target:remove()
-		fromPosition:sendMagicEffect(CONST_ME_POFF)
-		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Canteiro demolido. Materiais recuperados.")
+		if originalGround then
+			Game.createItem(originalGround, 1, pos)
+		end
+		
+		pos:sendMagicEffect(CONST_ME_POFF)
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Canteiro demolido. Materiais recuperados (100%).")
+		player:sendExtendedOpcode(102, "CLOSE")
 		return true
 	end
 
-	-- Adicionar demolição de parede pronta depois, se necessário
+	-- Caso 2: Demolindo Item Conclu\237do (50% de estorno)
+	local recipe = CONSTRUCTION_RECIPES[target:getId()]
+	if recipe then
+		-- SEGURAN\199A: Validar posse da casa antes de demolir item conclu\237do
+		local pos = target:getPosition()
+		local tile = Tile(pos)
+		local house = tile:getHouse()
+		if not house or (house:getOwnerGuid() ~= player:getGuid() and player:getGroup():getId() < 3) then
+			player:sendCancelMessage("Voc\234 n\227o tem permiss\227o para demolir estruturas nesta propriedade.")
+			return true
+		end
+
+		local pRefund = math.floor(recipe.planks * 0.5)
+		local nRefund = math.floor(recipe.nails * 0.5)
+		local originalGround = target:getCustomAttribute("originalGround")
+		
+		if pRefund > 0 then player:addItem(MATERIAL_PLANK, pRefund) end
+		if nRefund > 0 then player:addItem(MATERIAL_NAIL, nRefund) end
+		
+		-- Remove da persistência de memória de terreno
+		PersistenceManager.removeItem(pos)
+		
+		target:remove()
+		if originalGround then
+			Game.createItem(originalGround, 1, pos)
+		end
+
+		pos:sendMagicEffect(CONST_ME_BLOCKHIT)
+		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Estrutura demolida. Materiais estornados (50%).")
+		return true
+	end
+
+	-- Adicionar demoli\231\227o de parede pronta depois, se necess\225rio
 	-- ...
 
 	-- Lay down the wood
