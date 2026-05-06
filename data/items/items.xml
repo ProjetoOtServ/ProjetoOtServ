@@ -14774,7 +14774,14 @@
 	<item id="5298" name="wooden planks">
 		<attribute key="primarytype" value="tools (objects)"/>
 	</item>
-	<item fromid="5299" toid="5300" article="a" name="wooden plank">
+	<item id="5299" article="a" name="wooden plank">
+		<attribute key="primarytype" value="quest items"/>
+		<attribute key="weight" value="500"/>
+	</item>
+	<item id="5300" article="a" name="wooden plank">
+		<attribute key="primarytype" value="quest items"/>
+		<attribute key="weight" value="200"/>
+		<attribute key="pickupable" value="1"/>
 		<attribute key="primarytype" value="quest items"/>
 		<attribute key="weight" value="500"/>
 	</item>

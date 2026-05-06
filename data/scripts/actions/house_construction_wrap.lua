@@ -143,7 +143,7 @@ end
 
 -- Register for all construction item IDs
 local allIds = getAllConstructionIds()
-wrapAction:id(unpack(allIds))
-wrapAction:register()
+-- wrapAction:id(unpack(allIds))
+-- wrapAction:register()
 
-print("[House Construction] Wrap system loaded with " .. #allIds .. " construction item types.")
+print("[House Construction] Wrap system disabled.")
