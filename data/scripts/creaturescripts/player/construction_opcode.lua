@@ -189,6 +189,55 @@ function constructionOpcode.onExtendedOpcode(player, opcode, buffer)
                 
                 -- Persistência de Memória de Terreno
                 PersistenceManager.saveItem(finishedItem, player:getGuid())
+
+                -- Lógica Especial para Ladder Up (1948): Criar saída e descida automática
+                if targetId == 1948 then
+                    local upPos = Position(pos.x, pos.y, pos.z - 1)
+                    local landingPos = Position(pos.x, pos.y + 1, pos.z - 1)
+                    
+                    -- Captura ground original da saída
+                    local landingTile = Tile(landingPos)
+                    local landingGround = landingTile and landingTile:getGround()
+                    
+                    -- Cria o piso de madeira (Wooden Floor 408) 1 sqm ao sul no andar de cima
+                    local floor = Game.createItem(408, 1, landingPos)
+                    if floor then 
+                        if landingGround then floor:setCustomAttribute("originalGround", landingGround:getId()) end
+                        PersistenceManager.saveItem(floor, player:getGuid()) 
+                    end
+                    
+                    -- Captura ground original da descida
+                    local upTile = Tile(upPos)
+                    local upGround = upTile and upTile:getGround()
+
+                    -- Cria a escada de descida (Ladder Down 433) no mesmo tile da subida, mas no andar de cima
+                    local ladderDown = Game.createItem(433, 1, upPos)
+                    if ladderDown then 
+                        if upGround then ladderDown:setCustomAttribute("originalGround", upGround:getId()) end
+                        PersistenceManager.saveItem(ladderDown, player:getGuid()) 
+                    end
+                    
+                    landingPos:sendMagicEffect(CONST_ME_POFF)
+                    upPos:sendMagicEffect(CONST_ME_POFF)
+                end
+
+                -- Lógica Especial para Ladder Down (433): Criar subida automática
+                if targetId == 433 then
+                    local downPos = Position(pos.x, pos.y, pos.z + 1)
+                    
+                    -- Captura ground original da subida
+                    local downTile = Tile(downPos)
+                    local downGround = downTile and downTile:getGround()
+
+                    -- Cria a escada de subida (Ladder Up 1948) no mesmo tile, andar abaixo
+                    local ladderUp = Game.createItem(1948, 1, downPos)
+                    if ladderUp then 
+                        if downGround then ladderUp:setCustomAttribute("originalGround", downGround:getId()) end
+                        PersistenceManager.saveItem(ladderUp, player:getGuid()) 
+                    end
+                    
+                    downPos:sendMagicEffect(CONST_ME_POFF)
+                end
                 
                 pos:sendMagicEffect(CONST_ME_MAGIC_GREEN)
                 player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "Constru\231\227o conclu\237da com sucesso!")

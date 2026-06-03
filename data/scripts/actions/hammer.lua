@@ -63,6 +63,11 @@ function hammer.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 		target:remove()
 		if originalGround then
 			Game.createItem(originalGround, 1, pos)
+		else
+			local sTile = Tile(pos)
+			if sTile and not sTile:getGround() then
+				Game.createItem(103, 1, pos)
+			end
 		end
 		
 		pos:sendMagicEffect(CONST_ME_POFF)
@@ -93,9 +98,51 @@ function hammer.onUse(player, item, fromPosition, target, toPosition, isHotkey)
 		-- Remove da persistência de memória de terreno
 		PersistenceManager.removeItem(pos)
 		
+		-- Lógica Especial: Demolição Sincronizada de Escadas (Subida/Descida)
+		local targetId = target:getId()
+		if targetId == 433 or targetId == 1948 then
+			local otherPos = Position(pos.x, pos.y, (targetId == 433 and pos.z + 1 or pos.z - 1))
+			local otherTile = Tile(otherPos)
+			if otherTile then
+				local otherId = (targetId == 433 and 1948 or 433)
+				local otherItem = otherTile:getItemById(otherId)
+				if otherItem then
+					local otherOriginalGround = otherItem:getCustomAttribute("originalGround")
+					
+					PersistenceManager.removeItem(otherPos)
+					otherItem:remove()
+					
+					if otherOriginalGround then
+						Game.createItem(otherOriginalGround, 1, otherPos)
+					else
+						-- Fallback: Se não houver registro, coloca Dirt (103) para evitar vácuo
+						local oTile = Tile(otherPos)
+						if oTile and not oTile:getGround() then
+							Game.createItem(103, 1, otherPos)
+						end
+					end
+					
+					otherPos:sendMagicEffect(CONST_ME_POFF)
+				end
+			end
+			
+			-- Teleporta o jogador para baixo se ele estiver demolindo a escada em que está (Descida 433)
+			if targetId == 433 then
+				player:teleportTo(otherPos)
+				otherPos:sendMagicEffect(CONST_ME_TELEPORT)
+			end
+		end
+
 		target:remove()
+		
+		-- Restauração de Solo (com Fallback para Dirt 103)
 		if originalGround then
 			Game.createItem(originalGround, 1, pos)
+		else
+			local tTile = Tile(pos)
+			if tTile and not tTile:getGround() then
+				Game.createItem(103, 1, pos)
+			end
 		end
 
 		pos:sendMagicEffect(CONST_ME_BLOCKHIT)

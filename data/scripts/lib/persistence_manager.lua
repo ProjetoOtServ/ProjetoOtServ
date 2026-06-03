@@ -8,7 +8,14 @@ function PersistenceManager.saveItem(item, ownerId)
     
     local pos = item:getPosition()
     local itemId = item:getId()
-    local attributes = "" -- Podemos serializar atributos customizados aqui se necessário
+    
+    -- Serializa atributos importantes (ex: originalGround)
+    local attrList = {}
+    local originalGround = item:getCustomAttribute("originalGround")
+    if originalGround then
+        table.insert(attrList, "og:" .. originalGround)
+    end
+    local attributes = table.concat(attrList, ";")
     
     -- Verifica se já existe um registro para esta posição para evitar duplicatas
     db.asyncQuery(string.format("DELETE FROM `construction_persistence` WHERE `x` = %d AND `y` = %d AND `z` = %d", pos.x, pos.y, pos.z))
@@ -47,6 +54,7 @@ function PersistenceManager.loadAll()
             local y = result.getNumber(resultId, "y")
             local z = result.getNumber(resultId, "z")
             local ownerId = result.getNumber(resultId, "owner_id")
+            local attributes = result.getString(resultId, "attributes")
             
             local pos = Position(x, y, z)
             local tile = Tile(pos)
@@ -62,6 +70,18 @@ function PersistenceManager.loadAll()
                     newItem:setCustomAttribute("persistent", 1)
                     newItem:setCustomAttribute("construction_owner", ownerId)
                     newItem:setAttribute(ITEM_ATTRIBUTE_STORE, os.time())
+                    
+                    -- Desserializa atributos
+                    if attributes and attributes ~= "" then
+                        local attrs = attributes:split(";")
+                        for _, attr in ipairs(attrs) do
+                            local pair = attr:split(":")
+                            if pair[1] == "og" then
+                                newItem:setCustomAttribute("originalGround", tonumber(pair[2]))
+                            end
+                        end
+                    end
+                    
                     count = count + 1
                 end
             end
